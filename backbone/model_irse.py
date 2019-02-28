@@ -235,3 +235,16 @@ def IR_SE_152(input_size):
     model = Backbone(input_size, 152, 'ir_se')
 
     return model
+
+if __name__ == '__main__':
+
+    model=IR_50([224, 224])
+    # print(model)
+    model.eval().cuda()
+    import time
+
+    for i in range(10):
+        x = torch.randn(1, 3, 224, 224)
+        start = time.time()
+        y0 = model(x.cuda())
+        print(time.time() - start, y0.size())

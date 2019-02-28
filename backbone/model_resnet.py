@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, ReLU, Dropout, MaxPool2d, Sequential, Module
 
@@ -92,7 +93,7 @@ class ResNet(Module):
 
     def __init__(self, input_size, block, layers, zero_init_residual = True):
         super(ResNet, self).__init__()
-        assert input_size[0] in [112, 224], "input_size should be [112, 112] or [224, 224]"
+        # assert input_size[0] in [112, 224], "input_size should be [112, 112] or [224, 224]"
         self.inplanes = 64
         self.conv1 = Conv2d(3, 64, kernel_size = 7, stride = 2, padding = 3, bias = False)
         self.bn1 = BatchNorm2d(64)
@@ -108,7 +109,8 @@ class ResNet(Module):
         if input_size[0] == 112:
             self.fc = Linear(2048 * 4 * 4, 512)
         else:
-            self.fc = Linear(2048 * 8 * 8, 512)
+            # self.fc = Linear(2048 * 8 * 8, 512)
+            self.fc = Linear(247808, 512)
         self.bn_o2 = BatchNorm1d(512)
 
         for m in self.modules():
@@ -186,3 +188,16 @@ def ResNet_152(input_size, **kwargs):
     model = ResNet(input_size, Bottleneck, [3, 8, 36, 3], **kwargs)
 
     return model
+
+if __name__ == '__main__':
+   #224需要18ms  352需要21ms
+    model=ResNet_50([352, 352])
+    # print(model)
+    model.eval().cuda()
+    import time
+
+    for i in range(10):
+        x = torch.randn(1, 3, 352, 352)
+        start = time.time()
+        y0 = model(x.cuda())
+        print(time.time() - start, y0.size())

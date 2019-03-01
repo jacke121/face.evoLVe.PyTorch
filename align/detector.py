@@ -22,9 +22,9 @@ def detect_faces(image, min_face_size = 20.0,
     """
 
     # LOAD MODELS
-    pnet = PNet()
-    rnet = RNet()
-    onet = ONet()
+    pnet = PNet().cuda()
+    rnet = RNet().cuda()
+    onet = ONet().cuda()
     onet.eval()
 
     # BUILD AN IMAGE PYRAMID
@@ -78,8 +78,8 @@ def detect_faces(image, min_face_size = 20.0,
     img_boxes = get_image_boxes(bounding_boxes, image, size = 24)
     img_boxes = Variable(torch.FloatTensor(img_boxes), volatile = True)
     output = rnet(img_boxes)
-    offsets = output[0].data.numpy()  # shape [n_boxes, 4]
-    probs = output[1].data.numpy()  # shape [n_boxes, 2]
+    offsets = output[0].cpu().data.numpy()  # shape [n_boxes, 4]
+    probs = output[1].cpu().data.numpy()  # shape [n_boxes, 2]
 
     keep = np.where(probs[:, 1] > thresholds[1])[0]
     bounding_boxes = bounding_boxes[keep]
@@ -99,9 +99,9 @@ def detect_faces(image, min_face_size = 20.0,
         return [], []
     img_boxes = Variable(torch.FloatTensor(img_boxes), volatile = True)
     output = onet(img_boxes)
-    landmarks = output[0].data.numpy()  # shape [n_boxes, 10]
-    offsets = output[1].data.numpy()  # shape [n_boxes, 4]
-    probs = output[2].data.numpy()  # shape [n_boxes, 2]
+    landmarks = output[0].cpu().data.numpy()  # shape [n_boxes, 10]
+    offsets = output[1].cpu().data.numpy()  # shape [n_boxes, 4]
+    probs = output[2].cpu().data.numpy()  # shape [n_boxes, 2]
 
     keep = np.where(probs[:, 1] > thresholds[2])[0]
     bounding_boxes = bounding_boxes[keep]
@@ -122,3 +122,18 @@ def detect_faces(image, min_face_size = 20.0,
     landmarks = landmarks[keep]
 
     return bounding_boxes, landmarks
+
+if __name__ == '__main__':
+    from PIL import Image
+    from detector import detect_faces
+    from visualization_utils import show_results
+    import time
+    img = Image.open('d:/guo.jpg')  # modify the image path to yours
+    #cpu需要570ms
+    #gpu 需要256ms
+    for i in range(10):
+        start=time.time()
+        bounding_boxes, landmarks = detect_faces(img)  # detect bboxes and landmarks for all faces in the image
+        print('detect time',time.time()-start)
+    img=show_results(img, bounding_boxes, landmarks)  # visualize the results
+    img.show()

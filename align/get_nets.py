@@ -109,7 +109,7 @@ class RNet(nn.Module):
             b: a float tensor with shape [batch_size, 4].
             a: a float tensor with shape [batch_size, 2].
         """
-        x = self.features(x)
+        x = self.features(x.cuda())
         a = self.conv5_1(x)
         b = self.conv5_2(x)
         a = F.softmax(a)
@@ -161,7 +161,7 @@ class ONet(nn.Module):
             b: a float tensor with shape [batch_size, 4].
             a: a float tensor with shape [batch_size, 2].
         """
-        x = self.features(x)
+        x = self.features(x.cuda())
         a = self.conv6_1(x)
         b = self.conv6_2(x)
         c = self.conv6_3(x)

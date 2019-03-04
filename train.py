@@ -4,7 +4,7 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from config import configurations
+from config import cfg
 from backbone.model_resnet import ResNet_50, ResNet_101, ResNet_152
 from backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 from head.metrics import ArcFace, CosFace, SphereFace, Am_softmax
@@ -19,7 +19,7 @@ import os
 if __name__ == '__main__':
 
     #======= hyperparameters & data loaders =======#
-    cfg = configurations[1]
+    cfg = cfg[1]
 
     SEED = cfg['SEED'] # random seed for reproduce results
     torch.manual_seed(SEED)

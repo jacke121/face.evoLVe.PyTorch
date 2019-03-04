@@ -1,10 +1,15 @@
 # Helper function for extracting features from pre-trained models
+import time
+
 import torch
 import cv2
 import numpy as np
 import os
 
 import matplotlib.pyplot as plt
+
+from backbone.model_irse import IR_50
+
 
 def l2_norm(input, axis = 1):
     norm = torch.norm(input, 2, axis, True)
@@ -13,15 +18,8 @@ def l2_norm(input, axis = 1):
     return output
 
 
-def extract_feature(img_root, backbone, model_root, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), tta = True):
+def extract_feature(img, backbone, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), tta = True):
     # pre-requisites
-    assert(os.path.exists(img_root))
-    print('Testing Data Root:', img_root)
-    assert (os.path.exists(model_root))
-    print('Backbone Model Root:', model_root)
-
-    # load image
-    img = cv2.imread(img_root)
 
     # resize image to [128, 128]
     resized = cv2.resize(img, (128, 128))
@@ -50,10 +48,6 @@ def extract_feature(img_root, backbone, model_root, device = torch.device("cuda:
     flipped = (flipped - 127.5) / 128.0
     flipped = torch.from_numpy(flipped)
 
-
-    # load backbone from a checkpoint
-    print("Loading Backbone Checkpoint '{}'".format(model_root))
-    backbone.load_state_dict(torch.load(model_root))
     backbone.to(device)
 
     # extract features
@@ -69,3 +63,23 @@ def extract_feature(img_root, backbone, model_root, device = torch.device("cuda:
 #     features = np.load("features.npy")
 
     return features
+
+if __name__ == '__main__':
+    path=r'd:/data\photo/'
+    backbone_resume_root='../model/backbone_ir50_asia.pth'
+    input_size=[112, 112]
+    backbone=IR_50(input_size)
+
+    backbone.load_state_dict(torch.load(backbone_resume_root))
+
+    # load backbone from a checkpoint
+    print("Loading Backbone Checkpoint '{}'".format(backbone_resume_root))
+
+    files= os.listdir(path)
+    for file in files:
+        if file.endswith(".jpg"):
+            img=cv2.imread(path+file)
+            img=cv2.resize(img,(112,112))
+            start=time.time()
+            features=extract_feature(img,backbone)
+            print('time',time.time()-start,features.size())

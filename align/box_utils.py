@@ -11,11 +11,9 @@ def nms(boxes, overlap_threshold = 0.5, mode = 'union'):
         overlap_threshold: a float number.
         mode: 'union' or 'min'.
 
-    Returns:
-        list with indices of the selected boxes
+    Returns:   list with indices of the selected boxes
     """
 
-    # if there are no boxes, return the empty list
     if len(boxes) == 0:
         return []
 
